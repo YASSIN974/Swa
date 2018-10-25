@@ -6,34 +6,13 @@ const fetchVideoInfo = require('youtube-info');
 const YouTube = require('simple-youtube-api');
 const youtube = new YouTube("AIzaSyAdORXg7UZUo7sePv97JyoDqtQVi3Ll0b8");
 const queue = new Map();
-const client = new Discord.Client();
- 
-client.on('ready', function(){
- console.log(`Logged in as ${client.user.tag}!`);
-    
-   // var s = ['483063515981283354','483063446376677386','483063378726879232','483063354332545045','483063463179190293'];
-   var s = ['483055660209012736','480169573530861578','483055655800930315'];
-    setInterval(function (){
-    client.user.setPresence({
- game: { 
-    type: 1,
-     url: 'https://www.twitch.tv/skwadraa',
-    name: 'I AM CUTE',
-    application_id: '477187715658547201',
-     assets: {
-         large_image:   `${s[Math.floor(Math.random() * s.length)]}`,
-  
-    }
-  }
-    });
-    }, 5000);
-});
-const devs = ["332713449215754242"];
-const prefix = "1"
+ const client = new Discord.Client();
+const prefix = "$"
 client.on('message', async msg => {
     if (msg.author.bot) return undefined;
     if (!msg.content.startsWith(prefix)) return undefined;
     const args = msg.content.split(' ');
+ 
     const searchString = args.slice(1).join(' ');
     const url = args[1] ? args[1] .replace(/<(.+)>/g, '$1') : '';
     const serverQueue = queue.get(msg.guild.id);
@@ -50,10 +29,7 @@ client.on('message', async msg => {
             return msg.channel.send('لا يتوآجد لدي صلاحية للتكلم بهذآ الروم').then(message =>{message.delete(2000)})
         }
  
-        if (!permissions.has('EMBED_LINKS')) {
-            return msg.channel.sendMessage("**يجب توآفر برمشن `EMBED LINKS`لدي **rl").then(message =>{message.delete(2000)})
-            }
- 
+       
         if (url.match(/^https?:\/\/(www.youtube.com|youtube.com)\/playlist(.*)$/)) {
             const playlist = await youtube.getPlaylist(url);
             const videos = await playlist.getVideos();
@@ -73,11 +49,11 @@ client.on('message', async msg => {
                     var videos = await youtube.searchVideos(searchString, 5);
                     let index = 0;
                    
-                 
                     msg.channel.send(`**
 ${videos.map(video2 => `[\`${++index}\`]${video2.title}`).join('\n')}**`).then(message =>{
  
                         message.delete(15000)
+ 
  
                     });
                     try {
@@ -206,6 +182,7 @@ function play(guild, song) {
     const serverQueue = queue.get(guild.id);
  
     if (!song) {
+      serverQueue.voiceChannel.leave();
         queue.delete(guild.id);
         return;
     }
@@ -315,5 +292,5 @@ client.on('message' , message => {
   }
 }
  });
-
+ 
 client.login(process.env.BOT_TOKEN);
